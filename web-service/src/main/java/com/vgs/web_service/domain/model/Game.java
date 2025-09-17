@@ -1,5 +1,6 @@
 package com.vgs.web_service.domain.model;
 
+import com.vgs.web_service.domain.exception.InvalidMoveException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +57,31 @@ public class Game {
                             .build());
                 }
             }
+        }
+    }
+
+    public void makeMove(CellValue playerId, Integer x, Integer y) {
+        validateMove(playerId, x, y);
+        cells.stream()
+                .filter(cell -> cell.getRow_number().equals(x) && cell.getColumn_number().equals(y))
+                .findFirst()
+                .ifPresent(cell -> cell.setValue(playerId));
+        currentTurn = (currentTurn == CellValue.X) ? CellValue.O : CellValue.X;
+    }
+
+    private void validateMove(CellValue playerId, Integer x, Integer y) {
+        if (status != GameStatus.IN_PROGRESS) {
+            throw new InvalidMoveException("Game is already finished");
+        }
+        if (!playerId.equals(currentTurn)) {
+            throw new InvalidMoveException("It's not player " + playerId + "'s turn. Current turn: " + currentTurn);
+        }
+        boolean cellOccupied = cells.stream()
+                .anyMatch(cell -> cell.getRow_number().equals(x) 
+                        && cell.getColumn_number().equals(y) 
+                        && cell.getValue() != CellValue.EMPTY);
+        if (cellOccupied) {
+            throw new InvalidMoveException("Cell at position (" + x + "," + y + ") is already occupied");
         }
     }
 }

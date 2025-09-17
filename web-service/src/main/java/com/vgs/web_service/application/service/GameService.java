@@ -1,6 +1,7 @@
 package com.vgs.web_service.application.service;
 
 import com.vgs.web_service.domain.exception.GameNotFoundException;
+import com.vgs.web_service.domain.model.CellValue;
 import com.vgs.web_service.domain.model.Game;
 import com.vgs.web_service.domain.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,12 @@ public class GameService {
             throw new GameNotFoundException(id);
         }
         return game;
+    }
+
+    @Transactional
+    public Game makeMove(Long gameId, CellValue playerId, Integer x, Integer y) {
+        Game game = getGame(gameId);
+        game.makeMove(playerId, x, y);
+        return gameRepository.save(game);
     }
 }
