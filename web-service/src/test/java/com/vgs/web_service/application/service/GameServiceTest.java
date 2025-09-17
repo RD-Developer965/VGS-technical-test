@@ -45,4 +45,39 @@ class GameServiceTest {
         assertThat(result.getCells().size()).isEqualTo(9);
         
     }
+
+    @Test
+    void getGame_ShouldReturnGameWhenFound() {
+        // Given
+        Long gameId = 1L;
+        Game expectedGame = Game.builder()
+                .id(gameId)
+                .build();
+        expectedGame.initializeBoard();
+
+        when(gameRepository.findById(gameId)).thenReturn(expectedGame);
+
+        // When
+        Game result = gameService.getGame(gameId);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(gameId);
+    }
+
+    @Test
+    void getGame_ShouldThrowExceptionWhenNotFound() {
+        // Given
+        Long gameId = 1L;
+
+        when(gameRepository.findById(gameId)).thenReturn(null);
+
+        // When / Then
+        try {
+            gameService.getGame(gameId);
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(com.vgs.web_service.domain.exception.GameNotFoundException.class);
+            assertThat(e.getMessage()).isEqualTo("Game with id " + gameId + " not found");
+        }
+    }
 }

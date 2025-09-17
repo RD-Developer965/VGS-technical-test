@@ -4,4 +4,6 @@ import com.vgs.web_service.domain.model.Game;
 
 public interface GameRepository {
     Game save(Game game);
+
+    Game findById(Long id);
 }

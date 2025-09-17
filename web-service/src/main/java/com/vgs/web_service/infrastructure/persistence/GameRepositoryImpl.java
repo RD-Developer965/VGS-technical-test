@@ -14,4 +14,9 @@ public class GameRepositoryImpl implements GameRepository {
     public Game save(Game game) {
         return jpaGameRepository.save(game);
     }
+
+    @Override
+    public Game findById(Long id) {
+        return jpaGameRepository.findById(id).orElse(null);
+    }
 }
