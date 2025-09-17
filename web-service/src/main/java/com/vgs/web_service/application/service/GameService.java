@@ -1,7 +1,6 @@
 package com.vgs.web_service.application.service;
 
 import com.vgs.web_service.domain.model.Game;
-import com.vgs.web_service.domain.model.GameStatus;
 import com.vgs.web_service.domain.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,7 @@ public class GameService {
 
     @Transactional
     public Game createGame() {
-        Game game = Game.builder()
-                .status(GameStatus.IN_PROGRESS)
-                .build();
+        Game game = Game.builder().build();
         return gameRepository.save(game);
     }
 }

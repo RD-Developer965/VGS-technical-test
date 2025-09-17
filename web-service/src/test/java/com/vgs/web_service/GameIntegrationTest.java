@@ -39,6 +39,9 @@ class GameIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.createdAt").exists())
-                .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+                .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
+                .andExpect(jsonPath("$.currentTurn").value("X"))
+                .andExpect(jsonPath("$.board").isArray())
+                .andExpect(jsonPath("$.board.length()").value(9));
     }
 }

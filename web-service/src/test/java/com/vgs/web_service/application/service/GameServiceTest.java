@@ -1,5 +1,6 @@
 package com.vgs.web_service.application.service;
 
+import com.vgs.web_service.domain.model.CellValue;
 import com.vgs.web_service.domain.model.Game;
 import com.vgs.web_service.domain.model.GameStatus;
 import com.vgs.web_service.domain.repository.GameRepository;
@@ -27,8 +28,9 @@ class GameServiceTest {
         // Given
         Game expectedGame = Game.builder()
                 .id(1L)
-                .status(GameStatus.IN_PROGRESS)
                 .build();
+        expectedGame.initializeBoard();
+
         when(gameRepository.save(any(Game.class))).thenReturn(expectedGame);
 
         // When
@@ -38,5 +40,9 @@ class GameServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getStatus()).isEqualTo(GameStatus.IN_PROGRESS);
+        assertThat(result.getCurrentTurn()).isEqualTo(CellValue.X);
+        assertThat(result.getCells()).isNotNull();
+        assertThat(result.getCells().size()).isEqualTo(9);
+        
     }
 }
