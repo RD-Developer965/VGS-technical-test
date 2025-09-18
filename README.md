@@ -30,4 +30,16 @@ To get started, check out the individual readme files:
 - [Backend README](./web-service/README.md)  
 - [Frontend README](./client/README.md)  
 
+- Backend: http://localhost:8080
+- Frontend: http://localhost:5173
+- Database: PostgreSQL on port 5432
+
 ---
+
+## 🐳 Running with Docker Compose
+
+You can start the entire application (frontend, backend, and PostgreSQL database) with Docker Compose:
+
+```bash
+docker-compose up --build
+```
