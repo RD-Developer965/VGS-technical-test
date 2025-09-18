@@ -25,6 +25,7 @@
   - is creating the game will play as X or as O.
 - `/api/games/move`:  
   - Requires authentication; associates the move with the authenticated user.
+  - Implement optimistic locking with @Version and OptimisticLockException
 
 ### New Endpoints
 

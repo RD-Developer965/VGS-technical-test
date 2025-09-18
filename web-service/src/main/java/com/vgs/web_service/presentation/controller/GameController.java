@@ -8,6 +8,9 @@ import com.vgs.web_service.presentation.dto.ErrorResponse;
 import com.vgs.web_service.presentation.dto.GameResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +29,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
+    private static final Logger log = LoggerFactory.getLogger(GameController.class);
 
     @PostMapping("/create")
     public ResponseEntity<GameResponse> createGame() {
@@ -37,6 +41,7 @@ public class GameController {
         try {
             return ResponseEntity.ok(GameResponse.fromDomain(gameService.getGame(matchId)));
         } catch (GameNotFoundException ex) {
+            log.warn("Game not found: gameId={}", matchId);
             ErrorResponse error = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
                     .status(HttpStatus.NOT_FOUND.value())
@@ -64,6 +69,7 @@ public class GameController {
                     .build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         } catch (InvalidMoveException ex) {
+            log.error("Invalid move", ex);
             ErrorResponse error = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
                     .status(HttpStatus.BAD_REQUEST.value())

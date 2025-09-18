@@ -89,6 +89,7 @@ public class Game {
 
     private void validateMove(CellValue playerId, Integer x, Integer y) {
         if (status != GameStatus.IN_PROGRESS) {
+            
             throw new InvalidMoveException("Game is already finished");
         }
         if (!playerId.equals(currentTurn)) {
