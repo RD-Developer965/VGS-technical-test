@@ -4,11 +4,10 @@ import { useGameStore } from '../store/gameStore';
 import { toast } from 'sonner';
 import axios from 'axios';
 import type { Game } from '../types/game';
-
-const API_URL = 'http://localhost:8080/api/games';
+import { config } from '../config/env';
 
 async function createGame() {
-  const response = await axios.post<Game>(`${API_URL}/create`);
+  const response = await axios.post<Game>(`${config.apiUrl}/games/create`);
   return response.data;
 }
 

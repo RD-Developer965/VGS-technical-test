@@ -5,16 +5,15 @@ import { type Game, type MoveRequest, type Cell, GameStatus, CellValue } from '.
 import axios from 'axios';
 import { useGameStore } from '../store/gameStore';
 import { GameOverModal } from '../components/GameOverModal';
-
-const API_URL = 'http://localhost:8080/api/games';
+import { config } from '../config/env';
 
 async function makeMove(move: MoveRequest) {
-  const response = await axios.post<Game>(`${API_URL}/move`, move);
+  const response = await axios.post<Game>(`${config.apiUrl}/games/move`, move);
   return response.data;
 }
 
 async function getGameStatus(gameId: number) {
-  const response = await axios.get<Game>(`${API_URL}/status?matchId=${gameId}`);
+  const response = await axios.get<Game>(`${config.apiUrl}/games/status?matchId=${gameId}`);
   return response.data;
 }
 
