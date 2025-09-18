@@ -19,7 +19,7 @@ async function getGameStatus(gameId: number) {
   return response.data;
 }
 
-function TicTacToe() {
+export default function TicTacToe() {
   const { currentPlayer, setCurrentPlayer, currentGameId, setCurrentGameId } = useGameStore();
 
   const { data: gameStatus, refetch: refetchStatus } = useQuery({
@@ -144,5 +144,3 @@ function TicTacToe() {
     </div>
   );
 }
-
-export default TicTacToe;

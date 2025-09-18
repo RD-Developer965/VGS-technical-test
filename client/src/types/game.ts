@@ -19,8 +19,6 @@ export interface Cell {
   value: CellValue;
 }
 
-export type Winner = Player | 'DRAW' | null;
-
 export interface Game {
   id: number;
   createdAt: string;

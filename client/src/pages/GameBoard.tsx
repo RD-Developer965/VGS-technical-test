@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { type Game, type MoveRequest, type Cell, GameStatus, CellValue } from '../types/game';
 import axios from 'axios';
 import { useGameStore } from '../store/gameStore';
-import { GameOverModal } from '../components/GameOverModal';
+import GameOverModal from '../components/GameOverModal';
 import { config } from '../config/env';
 
 async function makeMove(move: MoveRequest) {
@@ -17,7 +17,7 @@ async function getGameStatus(gameId: number) {
   return response.data;
 }
 
-// Función auxiliar para convertir el array plano en una matriz 3x3
+// Auxiliary function to convert the flat array into a 3x3 matrix
 function transformBoard(board: Cell[]): (Cell | null)[][] {
   const matrix: (Cell | null)[][] = Array(3).fill(null).map(() => Array(3).fill(null));
   
@@ -36,7 +36,7 @@ function GameBoard() {
     queryFn: async () => {
       if (!gameId) return null;
       const data = await getGameStatus(Number(gameId));
-      // Actualizamos el turno actual en el store
+      // We update the current turn in the store
       setCurrentPlayer(data.currentTurn);
       return data;
     },
@@ -117,7 +117,7 @@ function GameBoard() {
 
       <GameOverModal
         isOpen={gameStatus.status !== GameStatus.IN_PROGRESS}
-        winner={gameStatus.currentTurn}
+        status={gameStatus.status}
       />
     </div>
   );

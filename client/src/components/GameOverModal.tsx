@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { GameStatus } from '../types/game';
 
 interface GameOverModalProps {
   isOpen: boolean;
-  winner: 'X' | 'O' | 'DRAW' | null;
+  status: GameStatus
 }
 
-export function GameOverModal({ isOpen, winner }: GameOverModalProps) {
+export default function GameOverModal({ isOpen, status }: GameOverModalProps) {
   const navigate = useNavigate();
+
+  const winner = status === GameStatus.X_WON ? 'X' : status === GameStatus.O_WON ? 'O' : 'DRAW';
 
   if (!isOpen) return null;
 
@@ -14,7 +17,7 @@ export function GameOverModal({ isOpen, winner }: GameOverModalProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 transform transition-all">
         <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-          {winner === 'DRAW' ? "It's a Draw!" : `Player ${winner} Wins! 🎉`}
+          {status === GameStatus.DRAW ? "It's a Draw!" : `Player ${winner} Wins! 🎉`}
         </h2>
         <p className="text-gray-600 mb-6 text-center">
           {winner === 'DRAW' 
