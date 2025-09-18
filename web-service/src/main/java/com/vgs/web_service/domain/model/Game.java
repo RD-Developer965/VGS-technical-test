@@ -62,10 +62,28 @@ public class Game {
 
     public void makeMove(CellValue playerId, Integer x, Integer y) {
         validateMove(playerId, x, y);
+        
         cells.stream()
                 .filter(cell -> cell.getRow_number().equals(x) && cell.getColumn_number().equals(y))
                 .findFirst()
                 .ifPresent(cell -> cell.setValue(playerId));
+
+        CellValue winner = checkWinner();
+        if (winner != null) {
+            if (winner == CellValue.X) {
+                this.status = GameStatus.X_WON;
+            } else {
+                this.status = GameStatus.O_WON;
+            }
+            return;
+        }
+
+        // Check for draw
+        if (isDraw()) {
+            this.status = GameStatus.DRAW;
+            return;
+        }
+
         currentTurn = (currentTurn == CellValue.X) ? CellValue.O : CellValue.X;
     }
 
@@ -83,5 +101,47 @@ public class Game {
         if (cellOccupied) {
             throw new InvalidMoveException("Cell at position (" + x + "," + y + ") is already occupied");
         }
+    }
+
+    private CellValue checkWinner() {
+        // Check rows
+        for (int row = 1; row <= 3; row++) {
+            if (checkLine(row, 1, row, 2, row, 3)) {
+                return getCellValue(row, 1);
+            }
+        }
+
+        // Check columns
+        for (int col = 1; col <= 3; col++) {
+            if (checkLine(1, col, 2, col, 3, col)) {
+                return getCellValue(1, col);
+            }
+        }
+
+        // Check diagonals
+        if (checkLine(1, 1, 2, 2, 3, 3) || checkLine(1, 3, 2, 2, 3, 1)) {
+            return getCellValue(2, 2);
+        }
+
+        return null;
+    }
+
+    private boolean checkLine(int row1, int col1, int row2, int col2, int row3, int col3) {
+        CellValue first = getCellValue(row1, col1);
+        if (first == CellValue.EMPTY) return false;
+        
+        return first == getCellValue(row2, col2) && first == getCellValue(row3, col3);
+    }
+
+    private CellValue getCellValue(int row, int col) {
+        return cells.stream()
+                .filter(cell -> cell.getRow_number() == row && cell.getColumn_number() == col)
+                .findFirst()
+                .map(Cell::getValue)
+                .orElse(CellValue.EMPTY);
+    }
+
+    private boolean isDraw() {
+        return cells.stream().noneMatch(cell -> cell.getValue() == CellValue.EMPTY);
     }
 }

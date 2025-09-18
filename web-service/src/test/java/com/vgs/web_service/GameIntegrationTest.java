@@ -80,4 +80,141 @@ class GameIntegrationTest {
                 .andExpect(jsonPath("$.message").value("Game with id " + invalidGameId + " not found"))
                 .andExpect(jsonPath("$.path").value("/api/games/status"));
     }
+
+    @Test
+    void makeMove_ShouldUpdateGameStateWhenMoveIsValid() throws Exception {
+        // First create a game
+        String createResponse = mockMvc.perform(post("/api/games/create"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number gameId = JsonPath.read(createResponse, "$.id");
+
+        // Make a valid move
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(gameId))
+                .andExpect(jsonPath("$.currentTurn").value("O"))
+                .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
+                .andExpect(jsonPath("$.board[0].value").value("X")); // Verificar que la celda se marcó
+    }
+
+    @Test
+    void makeMove_ShouldReturnNotFoundWhenGameDoesNotExist() throws Exception {
+        Long nonExistentGameId = 9999L;
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + nonExistentGameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Game with id " + nonExistentGameId + " not found"));
+    }
+
+    @Test
+    void makeMove_ShouldReturnBadRequestWhenMoveIsInvalid() throws Exception {
+        // First create a game
+        String createResponse = mockMvc.perform(post("/api/games/create"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number gameId = JsonPath.read(createResponse, "$.id");
+
+        // Make first move
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isOk());
+
+        // Try to make a move in the same position
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"O\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Cell at position (1,1) is already occupied"));
+    }
+
+    @Test
+    void makeMove_ShouldCompleteGameWithWinner() throws Exception {
+        // First create a game
+        String createResponse = mockMvc.perform(post("/api/games/create"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number gameId = JsonPath.read(createResponse, "$.id");
+
+        // Make moves to create a winning scenario for X (horizontal first row)
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"O\",\"square\":{\"x\":2,\"y\":1}}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":2}}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"O\",\"square\":{\"x\":2,\"y\":2}}"))
+                .andExpect(status().isOk());
+
+        // Winning move for X
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":3}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("X_WON"));
+    }
+
+    @Test
+    void makeMove_ShouldCompleteGameWithDraw() throws Exception {
+        // First create a game
+        String createResponse = mockMvc.perform(post("/api/games/create"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number gameId = JsonPath.read(createResponse, "$.id");
+
+        // Sequence of moves leading to a draw
+        String[][] moves = {
+            {"X", "1", "1"}, {"O", "1", "2"}, {"X", "1", "3"},
+            {"O", "2", "2"}, {"X", "2", "1"}, {"O", "2", "3"},
+            {"X", "3", "2"}, {"O", "3", "1"}
+        };
+
+        // Execute all moves except the last one
+        for (String[] move : moves) {
+            mockMvc.perform(post("/api/games/move")
+                    .contentType("application/json")
+                    .content("{\"matchId\":" + gameId + ",\"playerId\":\"" + move[0] + 
+                            "\",\"square\":{\"x\":" + move[1] + ",\"y\":" + move[2] + "}}"))
+                    .andExpect(status().isOk());
+        }
+
+        // Final move leading to draw
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":3,\"y\":3}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DRAW"));
+    }
 }

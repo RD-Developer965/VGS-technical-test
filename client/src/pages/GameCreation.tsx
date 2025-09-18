@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useGameStore } from '../store/gameStore';
 import { toast } from 'sonner';
 import axios from 'axios';
-import type { Game, Player } from '../types/game';
+import type { Game } from '../types/game';
 
 const API_URL = 'http://localhost:8080/api/games';
 
@@ -14,7 +14,7 @@ async function createGame() {
 
 function GameCreation() {
   const navigate = useNavigate();
-  const { setSelectedPlayer, setCurrentGameId } = useGameStore();
+  const { setCurrentGameId } = useGameStore();
 
   const createGameMutation = useMutation({
     mutationFn: createGame,
@@ -31,8 +31,7 @@ function GameCreation() {
     }
   });
 
-  const handlePlayerSelect = (player: Player) => {
-    setSelectedPlayer(player);
+  const handleNewGame = () => {
     createGameMutation.mutate();
   };
 
@@ -42,29 +41,18 @@ function GameCreation() {
         Welcome to Tic Tac Toe
       </h1>
       <p className="text-gray-600 mb-8 text-center">
-        Choose your player to start the game
+        Click the button below to start a new game!
       </p>
-      <div className="flex gap-6 justify-center">
+      <div className="flex justify-center">
         <button
-          onClick={() => handlePlayerSelect('X')}
+          onClick={() => handleNewGame()}
           disabled={createGameMutation.isPending}
-          className={`transform transition-all duration-200 hover:scale-105 bg-primary-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-primary-600 hover:shadow-xl flex items-center justify-center space-x-2 min-w-[140px] ${
+          className={`appearance-none border-0 transform transition-all duration-200 hover:scale-105 bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-800 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-opacity-50 flex items-center justify-center space-x-2 min-w-[140px] disabled:opacity-50 disabled:cursor-not-allowed ${
             createGameMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           <span className="text-xl">
-            {createGameMutation.isPending ? 'Creating...' : 'Play as X'}
-          </span>
-        </button>
-        <button
-          onClick={() => handlePlayerSelect('O')}
-          disabled={createGameMutation.isPending}
-          className={`transform transition-all duration-200 hover:scale-105 bg-secondary-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-secondary-600 hover:shadow-xl flex items-center justify-center space-x-2 min-w-[140px] ${
-            createGameMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          <span className="text-xl">
-            {createGameMutation.isPending ? 'Creating...' : 'Play as O'}
+            {createGameMutation.isPending ? 'Creating...' : 'New Game'}
           </span>
         </button>
       </div>

@@ -2,6 +2,7 @@ package com.vgs.web_service.presentation.controller;
 
 import com.vgs.web_service.application.service.GameService;
 import com.vgs.web_service.domain.exception.GameNotFoundException;
+import com.vgs.web_service.domain.exception.InvalidMoveException;
 import com.vgs.web_service.domain.model.CellValue;
 import com.vgs.web_service.domain.model.Game;
 import com.vgs.web_service.domain.model.GameStatus;
@@ -85,5 +86,115 @@ class GameControllerTest {
                 .andExpect(jsonPath("$.error").value("Not Found"))
                 .andExpect(jsonPath("$.message").value("Game with id " + invalidGameId + " not found"))
                 .andExpect(jsonPath("$.path").value("/api/games/status"));
+    }
+
+    @Test
+    void makeMove_ShouldUpdateGameStateWhenMoveIsValid() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build();
+
+        Long gameId = 1L;
+        Game updatedGame = Game.builder()
+                .id(gameId)
+                .build();
+        updatedGame.initializeBoard();
+        updatedGame.makeMove(CellValue.X, 1, 1);
+
+        when(gameService.makeMove(gameId, CellValue.X, 1, 1)).thenReturn(updatedGame);
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(gameId))
+                .andExpect(jsonPath("$.currentTurn").value(CellValue.O.toString()))
+                .andExpect(jsonPath("$.status").value(GameStatus.IN_PROGRESS.toString()));
+    }
+
+    @Test
+    void makeMove_ShouldReturnNotFoundWhenGameDoesNotExist() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build();
+
+        Long gameId = 123L;
+        when(gameService.makeMove(gameId, CellValue.X, 1, 1))
+                .thenThrow(new GameNotFoundException(gameId));
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":123,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("Game with id " + gameId + " not found"));
+    }
+
+    @Test
+    void makeMove_ShouldReturnBadRequestWhenMoveIsInvalid() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build();
+
+        Long gameId = 1L;
+        when(gameService.makeMove(gameId, CellValue.X, 1, 1))
+                .thenThrow(new InvalidMoveException("Cell at position (1,1) is already occupied"));
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Cell at position (1,1) is already occupied"));
+    }
+
+    @Test
+    void makeMove_ShouldReturnGameStatusWhenPlayerWins() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build();
+
+        Long gameId = 1L;
+        Game winningGame = Game.builder()
+                .id(gameId)
+                .build();
+        winningGame.initializeBoard();
+        // Simular una victoria
+        winningGame.makeMove(CellValue.X, 1, 1);
+        winningGame.makeMove(CellValue.O, 2, 1);
+        winningGame.makeMove(CellValue.X, 1, 2);
+        winningGame.makeMove(CellValue.O, 2, 2);
+        winningGame.makeMove(CellValue.X, 1, 3); // Movimiento ganador
+
+        when(gameService.makeMove(gameId, CellValue.X, 1, 3)).thenReturn(winningGame);
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":3}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(GameStatus.X_WON.toString()));
+    }
+
+    @Test
+    void makeMove_ShouldReturnGameStatusWhenDraw() throws Exception {
+        mockMvc = MockMvcBuilders.standaloneSetup(gameController).build();
+
+        Long gameId = 1L;
+        Game drawGame = Game.builder()
+                .id(gameId)
+                .build();
+        drawGame.initializeBoard();
+        // Simular un empate
+        drawGame.makeMove(CellValue.X, 1, 1);
+        drawGame.makeMove(CellValue.O, 1, 2);
+        drawGame.makeMove(CellValue.X, 1, 3);
+        drawGame.makeMove(CellValue.O, 2, 2);
+        drawGame.makeMove(CellValue.X, 2, 1);
+        drawGame.makeMove(CellValue.O, 2, 3);
+        drawGame.makeMove(CellValue.X, 3, 2);
+        drawGame.makeMove(CellValue.O, 3, 1);
+        drawGame.makeMove(CellValue.X, 3, 3); // Último movimiento que lleva al empate
+
+        when(gameService.makeMove(gameId, CellValue.X, 3, 3)).thenReturn(drawGame);
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":3,\"y\":3}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(GameStatus.DRAW.toString()));
     }
 }
