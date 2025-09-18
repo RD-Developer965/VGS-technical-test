@@ -27,7 +27,7 @@ Each part has its own `README.md` file with detailed setup and usage instruction
 
 To get started, check out the individual readme files:
 
-- [Backend README](./backend/README.md)  
-- [Frontend README](./frontend/README.md)  
+- [Backend README](./web-service/README.md)  
+- [Frontend README](./client/README.md)  
 
 ---
