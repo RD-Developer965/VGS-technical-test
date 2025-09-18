@@ -11,7 +11,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.vgs.web_service.domain.model.CellValue;
+import com.vgs.web_service.presentation.dto.MoveRequest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -100,7 +103,7 @@ class GameIntegrationTest {
                 .andExpect(jsonPath("$.id").value(gameId))
                 .andExpect(jsonPath("$.currentTurn").value("O"))
                 .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
-                .andExpect(jsonPath("$.board[0].value").value("X")); // Verificar que la celda se marcó
+                .andExpect(jsonPath("$.board[0].value").value("X")); 
     }
 
     @Test
@@ -216,5 +219,26 @@ class GameIntegrationTest {
                 .content("{\"matchId\":" + gameId + ",\"playerId\":\"X\",\"square\":{\"x\":3,\"y\":3}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DRAW"));
+    }
+
+    @Test
+    void makeMove_ShouldReturnBadRequestWhenInputIsInvalid() throws Exception {
+
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(1L)
+        .            playerId(CellValue.X)
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
+        mockMvc.perform(post("/api/games/move")
+                .contentType("application/json")
+                .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.details.square").value("square is required"));
     }
 }

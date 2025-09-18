@@ -1,11 +1,14 @@
 package com.vgs.web_service.presentation.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vgs.web_service.application.service.GameService;
 import com.vgs.web_service.domain.exception.GameNotFoundException;
 import com.vgs.web_service.domain.exception.InvalidMoveException;
 import com.vgs.web_service.domain.model.CellValue;
 import com.vgs.web_service.domain.model.Game;
 import com.vgs.web_service.domain.model.GameStatus;
+import com.vgs.web_service.presentation.dto.MoveRequest;
+import com.vgs.web_service.presentation.dto.MoveRequest.Square;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,9 +104,18 @@ class GameControllerTest {
 
         when(gameService.makeMove(gameId, CellValue.X, 1, 1)).thenReturn(updatedGame);
 
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(1L)
+        .            playerId(CellValue.X)
+        .            square(new Square(1, 1))
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
         mockMvc.perform(post("/api/games/move")
                 .contentType("application/json")
-                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(gameId))
                 .andExpect(jsonPath("$.currentTurn").value(CellValue.O.toString()))
@@ -118,9 +130,18 @@ class GameControllerTest {
         when(gameService.makeMove(gameId, CellValue.X, 1, 1))
                 .thenThrow(new GameNotFoundException(gameId));
 
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(123L)
+        .            playerId(CellValue.X)
+        .            square(new Square(1, 1))
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
         mockMvc.perform(post("/api/games/move")
                 .contentType("application/json")
-                .content("{\"matchId\":123,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .content(requestJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
@@ -135,9 +156,18 @@ class GameControllerTest {
         when(gameService.makeMove(gameId, CellValue.X, 1, 1))
                 .thenThrow(new InvalidMoveException("Cell at position (1,1) is already occupied"));
 
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(1L)
+        .            playerId(CellValue.X)
+        .            square(new Square(1, 1))
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
         mockMvc.perform(post("/api/games/move")
                 .contentType("application/json")
-                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":1}}"))
+                .content(requestJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("Bad Request"))
@@ -153,18 +183,27 @@ class GameControllerTest {
                 .id(gameId)
                 .build();
         winningGame.initializeBoard();
-        // Simular una victoria
+        // Simulate winning scenario
         winningGame.makeMove(CellValue.X, 1, 1);
         winningGame.makeMove(CellValue.O, 2, 1);
         winningGame.makeMove(CellValue.X, 1, 2);
         winningGame.makeMove(CellValue.O, 2, 2);
-        winningGame.makeMove(CellValue.X, 1, 3); // Movimiento ganador
+        winningGame.makeMove(CellValue.X, 1, 3);
 
         when(gameService.makeMove(gameId, CellValue.X, 1, 3)).thenReturn(winningGame);
 
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(1L)
+        .            playerId(CellValue.X)
+        .            square(new Square(1, 3))
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
         mockMvc.perform(post("/api/games/move")
                 .contentType("application/json")
-                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":1,\"y\":3}}"))
+                .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(GameStatus.X_WON.toString()));
     }
@@ -178,7 +217,7 @@ class GameControllerTest {
                 .id(gameId)
                 .build();
         drawGame.initializeBoard();
-        // Simular un empate
+        // Simulate draw scenario
         drawGame.makeMove(CellValue.X, 1, 1);
         drawGame.makeMove(CellValue.O, 1, 2);
         drawGame.makeMove(CellValue.X, 1, 3);
@@ -187,13 +226,22 @@ class GameControllerTest {
         drawGame.makeMove(CellValue.O, 2, 3);
         drawGame.makeMove(CellValue.X, 3, 2);
         drawGame.makeMove(CellValue.O, 3, 1);
-        drawGame.makeMove(CellValue.X, 3, 3); // Último movimiento que lleva al empate
+        drawGame.makeMove(CellValue.X, 3, 3);
 
         when(gameService.makeMove(gameId, CellValue.X, 3, 3)).thenReturn(drawGame);
 
+        MoveRequest moveRequest = MoveRequest.builder()
+        .            matchId(1L)
+        .            playerId(CellValue.X)
+        .            square(new Square(3, 3))
+        .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(moveRequest);
+
         mockMvc.perform(post("/api/games/move")
                 .contentType("application/json")
-                .content("{\"matchId\":1,\"playerId\":\"X\",\"square\":{\"x\":3,\"y\":3}}"))
+                .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(GameStatus.DRAW.toString()));
     }

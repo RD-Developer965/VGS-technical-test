@@ -6,9 +6,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class MoveRequest {
     @NotNull(message = "matchId is required")
     private Long matchId;
@@ -21,6 +24,7 @@ public class MoveRequest {
     private Square square;
 
     @Data
+    @AllArgsConstructor
     public static class Square {
         @NotNull(message = "x coordinate is required")
         @Min(value = 1, message = "x coordinate must be between 1 and 3")
