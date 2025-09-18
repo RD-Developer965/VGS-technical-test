@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface GameState {
+export interface GameState {
   currentGameId: number | null;
   setCurrentGameId: (id: number | null) => void;
   currentPlayer: 'X' | 'O';

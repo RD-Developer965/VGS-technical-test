@@ -28,7 +28,7 @@ function transformBoard(board: Cell[]): (Cell | null)[][] {
   return matrix;
 }
 
-function GameBoard() {
+export default function GameBoard() {
   const { gameId } = useParams();
   const { currentPlayer, setCurrentPlayer } = useGameStore();
   const { data: gameStatus, refetch: refetchStatus } = useQuery({
@@ -122,5 +122,3 @@ function GameBoard() {
     </div>
   );
 }
-
-export default GameBoard;

@@ -11,7 +11,7 @@ async function createGame() {
   return response.data;
 }
 
-function GameCreation() {
+export default function GameCreation() {
   const navigate = useNavigate();
   const { setCurrentGameId } = useGameStore();
 
@@ -58,5 +58,3 @@ function GameCreation() {
     </div>
   );
 }
-
-export default GameCreation;
