@@ -1,75 +1,33 @@
-# Tic Tac Toe Game Service
+# Tic Tac Toe 🎮
 
-This is a RESTful web service for managing Tic Tac Toe games using Spring Boot and PostgreSQL.
+## 👤 Author
 
-## Technologies Used
+Created by **Rafael Díaz Anguita**
 
-- Java 21
-- Spring Boot 3.5.5
-- PostgreSQL 15
-- Docker & Docker Compose
-- Maven
+A **fullstack Tic Tac Toe project** built with:
 
-## Prerequisites
+- **Backend**: Spring Boot  
+- **Frontend**: React  
 
-- Java 21 or higher
-- Docker and Docker Compose
-- Maven
+---
 
-## Getting Started
+## 📖 Overview
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/VGS-technical-test.git
-   cd VGS-technical-test
-   ```
+This project is a complete implementation of the classic Tic Tac Toe game.  
+It is split into two main parts:
 
-2. Start the PostgreSQL database using Docker Compose:
-   ```bash
-   docker-compose up -d
-   ```
+1. **Backend** – powered by Spring Boot, responsible for handling the game logic, persistence, and APIs.  
+2. **Frontend** – built with React, providing a modern user interface for playing the game.  
 
-3. Build and run the application:
-   ```bash
-   cd web-service
-   ./mvnw spring-boot:run
-   ```
+Each part has its own `README.md` file with detailed setup and usage instructions.
 
-The application will be available at `http://localhost:8080`
+---
 
-## API Endpoints
+## 🚀 Getting Started
 
-### Create a New Game
-```http
-POST /api/games/create
-```
+To get started, check out the individual readme files:
 
-Response:
-```json
-{
-    "id": 1,
-    "createdAt": "2025-09-17T10:00:00",
-    "status": "IN_PROGRESS"
-}
-```
+- [Backend README](./backend/README.md)  
+- [Frontend README](./frontend/README.md)  
 
-## Project Structure
-
-The project follows Clean Architecture principles with the following layers:
-
-- **Domain**: Contains business entities and repository interfaces
-- **Application**: Contains business logic and use cases
-- **Infrastructure**: Contains implementations of repositories and other external concerns
-- **Presentation**: Contains REST controllers and DTOs
-
-## Development
-
-To run the tests:
-```bash
-./mvnw test
-```
-
-To build the application:
-```bash
-./mvnw clean package
-```
+---
