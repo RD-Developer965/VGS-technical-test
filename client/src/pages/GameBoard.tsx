@@ -82,25 +82,30 @@ export default function GameBoard() {
         <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Tic Tac Toe</h1>
       </div>
       
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
         {transformBoard(gameStatus.board).map((row, i) =>
           row.map((cell, j) => (
             <button
               key={`${i}-${j}`}
               onClick={() => handleCellClick(i, j)}
               disabled={cell?.value !== CellValue.EMPTY || gameStatus.status !== GameStatus.IN_PROGRESS}
-              className={` bg-gray-800 hover:bg-gray-700 appearance-none border-0 text-[2.5rem] leading-none w-24 h-24 font-bold flex items-center justify-center rounded-xl transform transition-all duration-200 
-                focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 disabled:cursor-not-allowed
+              className={`
+                bg-gray-800 hover:bg-gray-700 appearance-none border-0 
+                text-[8vw] sm:text-[2.5rem] leading-none 
+                w-full aspect-square font-bold flex items-center justify-center 
+                rounded-xl transform transition-all duration-200 
+                focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 
+                disabled:cursor-not-allowed
                 ${cell?.value === CellValue.EMPTY && gameStatus.status !== GameStatus.IN_PROGRESS ? 'hover:scale-105 hover:shadow-lg ' : ''}
-                ${cell?.value === 'X' ? 'text-white' : 
-                  cell?.value === 'O' ? 'text-white' : 
-                  ''}`}
+                ${cell?.value === 'X' ? 'text-white' : cell?.value === 'O' ? 'text-white' : ''}
+              `}
             >
               {cell?.value === CellValue.EMPTY ? '' : cell?.value}
             </button>
           ))
         )}
       </div>
+
 
       <div className="bg-gray-50 rounded-lg p-4">
         <div className="text-center">
